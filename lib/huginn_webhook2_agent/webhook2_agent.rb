@@ -52,7 +52,7 @@ module Agents
     def receive_web_request(request)
       params = request.params.except(:action, :controller, :agent_id, :user_id, :format)
       method = request.method_symbol.to_s
-      headers = request.headers.select {|k,v| k =~ /^HTTP_/}
+      headers = request.headers.select {|k,v| k.to_s[/^HTTP_/]}.to_h
 
       # check the secret
       secret = params.delete('secret')
@@ -90,7 +90,6 @@ module Agents
         JSON.parse(response.body)['success'] or
           return ["Not Authorized", 401]
       end
-
       params['X-HUGINN-HEADERS'] = header_for(headers)
       
       [payload_for(params)].flatten.each do |payload|
