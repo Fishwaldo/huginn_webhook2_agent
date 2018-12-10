@@ -22,7 +22,8 @@ module Agents
         * `payload_path` - JSONPath of the attribute in the POST body to be
           used as the Event payload.  Set to `.` to return the entire message.
           If `payload_path` points to an array, Events will be created for each element.
-        * 'header_path' - JSONPath of the headers you want passed as the Event Payload. Set to `.` to return all headers
+        * `header_path` - JSONPath of the headers you want passed as the Event Payload. Set to `.` to return all headers
+        * `header_key` - The key to use to store all the headers recieved
         * `verbs` - Comma-separated list of http verbs your agent will accept.
           For example, "post,get" will enable POST and GET requests. Defaults
           to "post".
@@ -45,7 +46,8 @@ module Agents
       { "secret" => "supersecretstring",
         "expected_receive_period_in_days" => 1,
         "payload_path" => "some_key",
-        "header_path" => "."
+        "header_path" => ".",
+        "header_key" => "X-HTTP-HEADERS"
       }
     end
 
@@ -90,7 +92,7 @@ module Agents
         JSON.parse(response.body)['success'] or
           return ["Not Authorized", 401]
       end
-      params['X-HUGINN-HEADERS'] = header_for(headers)
+      params[interpolated['header_key']] = header_for(headers)
       
       [payload_for(params)].flatten.each do |payload|
         create_event(payload: payload)
